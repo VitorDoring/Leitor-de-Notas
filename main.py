@@ -1,4 +1,4 @@
-# import gerar_html as html
+import html
 import pandas as pd
 
 def ler_excel(caminho,nome_aba):
@@ -12,7 +12,5 @@ dados = dict()
 
 for _, linha in planilha.iterrows():
     dados = linha.to_dict()
-    print(dados)
-    print(_)
-
+    html.gerar(dados)
 
