@@ -1,8 +1,5 @@
-def gerar (dados):
-    keys = list(dados.keys())[3:]
-    notas = [dados[key] for key in keys]
-    media = notas.pop(len(notas)-1)
-
+def run (keys,values):
+    media = values.pop(len(values)-1)
     html = f"""
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -112,26 +109,27 @@ def gerar (dados):
             <thead>
                 <tr>
 """
-    for _,dado in enumerate(keys):
-        html += f'                    <th>{dado}</th>\n'
+    for _,materia in enumerate(keys[3:]):
+        html += f'                    <th>{materia}</th>\n'
 
     html += """                </tr>
             </thead>
             <tbody>
                 <tr>
 """
-    for _, nota in enumerate(notas):
-        if nota < 6:
-            html += f'                    <td class="nota-vermelha">{nota}</td>\n'
-        elif nota >= 6:
-            html += f'                    <td class="nota-azul">{nota}</td>\n'
-        else:
+    for _, nota in enumerate(values[3:]):
+        try:
+            if nota < 6:
+                html += f'                    <td class="nota-vermelha">{nota:.1f}</td>\n'
+            elif nota >= 6:
+                html += f'                    <td class="nota-azul">{nota:.1f}</td>\n'       
+        except:
             html += f'                    <td class="nota-nao-informada">NÃO INFORMADA</td>\n'
 
     if media < 6:
-        html += f'                    <td class="media-vermelha">{media}</td>\n'
+        html += f'                    <td class="media-vermelha">{media:.1f}</td>\n'
     else:
-        html += f'                    <td class="media-azul">{media}</td>\n'
+        html += f'                    <td class="media-azul">{media:.1f}</td>\n'
 
     html += """                </tr>
             </tbody>
@@ -141,7 +139,7 @@ def gerar (dados):
 </html>
 
 """
-    arquivohtml = open(f'C:/Users/Master/Desktop/Leitor-de-notas/arquivos_html/{dados["Código"]}.html','w', encoding= "utf-8")
+    arquivohtml = open(f'C:/Users/Master/Desktop/Leitor-de-notas/arquivos_html/{values[0]}.html','w', encoding= "utf-8")
     arquivohtml.write(html)
     arquivohtml.close()
 
