@@ -7,7 +7,7 @@ def ler_excel(caminho,nome_aba):
     planilha = excel.parse(nome_aba)
     return planilha
 
-planilha = ler_excel('planilhas/planilha_gerada.xlsx','Sheet1')
+planilha = ler_excel('planilhas/planilha.xlsx','Página1')
 
 dados = dict()
 
@@ -21,5 +21,3 @@ for _, linha in planilha.iterrows():
     print(f"Aluno {values[1].upper()} está na linha {_ + 2}")
     print(f"{table}\n")
     gerarHtml.run(keys,values)
-
-

@@ -1,5 +1,16 @@
 def run (keys,values):
-    media = values.pop(len(values)-1)
+    
+    def calcularMedia():
+    
+        calculo = f"((AT {materias[0]}"
+        for x in range(1,len(materias)-1):
+            calculo += f" + AT {materias[x]}"
+        calculo += f")/{len(materias)-1}) = {materias[len(materias)-1]}"
+        return calculo
+    
+    materias = [materia for materia in keys[3:]]
+    notas = [nota for nota in values[3:]]
+    media = notas.pop(len(notas)-1)
     html = f"""
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -12,21 +23,65 @@ def run (keys,values):
             margin: 0;
             padding: 0;
             font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
+            background-color: #e9e9e9;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }}
+
+        .logo-container {{
             display: flex;
             justify-content: center;
-            margin-top: 10%;
-            min-height: 100vh;
+            align-items: center;
+            margin-top: -2%;
+            margin-bottom: -56%;
         }}
+
+        .logo-escola {{
+            width: 310px;
+        }}   
 
         .container {{
             background: white;
+            margin-top: -2%;
             border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             padding: 30px;
-            max-width: 1000px;
-            max-height: 250px;
+            max-width: 1100px;
+            max-height: 600px;
             width: 90%;
+        }}
+
+        .info-aluno {{
+            text-align: center;
+            display: flex;
+            gap: 80px;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: #000000;
+            font-size: 21px;
+            font-weight: 500;
+            border-bottom: 1px solid #1e3a8a;
+            padding-bottom: 30px;
+        }}
+
+        .info {{
+            text-align: center;
+            justify-content: center;
+            color: #1e3a8a;
+        }}
+
+        .conta-para-média {{
+            text-align: center;
+            margin-top: 40px;
+            font-size: 19px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 35px
         }}
 
         .tabela-notas {{
@@ -94,6 +149,34 @@ def run (keys,values):
             font-size: 18px
         }}
 
+        .btn-pdf {{
+            background-color: #ac1f1f;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin: 35px auto;
+            display: block;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            border: none;
+            outline: none;
+        }}
+
+        .btn-pdf:hover {{
+            background-color: #861616;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }}
+
+        .btn-pdf:active {{
+            background-color: #861616;
+            transform: translateY(1px);
+        }}
+
         h1 {{
             text-align: center;
             color: #1e3a8a;
@@ -104,12 +187,17 @@ def run (keys,values):
 </head>
 <body>
     <div class="container">
+        <div class="info-aluno">
+                <span><strong class ="info">RA:</strong> {values[0]}</span>  
+                <span><strong class ="info">ALUNO:</strong> {values[1]}</span> 
+                <span><strong class ="info">TURMA:</strong> {values[2]}</span>  
+            </div>
         <h1>Boletim de Notas do Técnico</h1>
         <table class="tabela-notas">
             <thead>
                 <tr>
 """
-    for _,materia in enumerate(keys[3:]):
+    for _,materia in enumerate(materias):
         html += f'                    <th>{materia}</th>\n'
 
     html += """                </tr>
@@ -117,7 +205,7 @@ def run (keys,values):
             <tbody>
                 <tr>
 """
-    for _, nota in enumerate(values[3:]):
+    for _, nota in enumerate(notas):
         try:
             if nota < 6:
                 html += f'                    <td class="nota-vermelha">{nota:.1f}</td>\n'
@@ -131,12 +219,24 @@ def run (keys,values):
     else:
         html += f'                    <td class="media-azul">{media:.1f}</td>\n'
 
-    html += """                </tr>
+    html += f"""                </tr>
             </tbody>
         </table>
+        <button class = btn-pdf>Exportar para PDF</button>
+        <div class="conta-para-média">
+            <strong>{calcularMedia()}</strong>
+            <strong>ATENÇÃO: NOTA(S) NÃO DIVULGADA(S), (PROVÁVEL MOTIVO) ==> Aluno não entregou projeto da referida disciplina.</strong>
+            <strong>Qualquer dúvida procure o professor da disciplina para maiores esclarecimentos.</strong>
+            <strong>Cordialmente, Prof. Alberson Wander Sá dos Santos</strong>
+        </div>
+    </div>
+    <div class="logo-container">
+        <img src="https://www.reforco.net/imgempresas/colegio-univap-villa-branca-ja-491-OJ0a.jpg" alt="Logo da Escola" class="logo-escola">
     </div>
 </body>
 </html>
+
+
 
 """
     arquivohtml = open(f'C:/Users/Master/Desktop/Leitor-de-notas/arquivos_html/{values[0]}.html','w', encoding= "utf-8")
