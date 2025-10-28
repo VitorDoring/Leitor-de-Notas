@@ -44,7 +44,7 @@ def run (keys,values):
 
         .container {{
             background: white;
-            margin-top: -2%;
+            margin-top: 2%;
             border-radius: 10px;
             justify-content: center;
             align-items: center;
@@ -74,14 +74,24 @@ def run (keys,values):
             color: #1e3a8a;
         }}
 
-        .conta-para-média {{
-            text-align: center;
+        .caixa-de-atenção {{
+            text-align: left;
             margin-top: 40px;
-            font-size: 19px;
+            padding: 5px;
+            font-size: 18px;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            gap: 35px
+            gap: 35px;
+            border: 3px solid #ffdf2b;
+            border-radius: 10px;
+            background-color: #fceea1bb;
+            font-weight: 349;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }}
+
+        .final {{
+            text-align: center;
+            font-weight: 600;
         }}
 
         .tabela-notas {{
@@ -223,11 +233,11 @@ def run (keys,values):
             </tbody>
         </table>
         <button class = btn-pdf>Exportar para PDF</button>
-        <div class="conta-para-média">
-            <strong>{calcularMedia()}</strong>
-            <strong>ATENÇÃO: NOTA(S) NÃO DIVULGADA(S), (PROVÁVEL MOTIVO) ==> Aluno não entregou projeto da referida disciplina.</strong>
-            <strong>Qualquer dúvida procure o professor da disciplina para maiores esclarecimentos.</strong>
-            <strong>Cordialmente, Prof. Alberson Wander Sá dos Santos</strong>
+        <div class="caixa-de-atenção">
+            <li>{calcularMedia()}</strong>
+            <li>ATENÇÃO: NOTA(S) NÃO DIVULGADA(S), (PROVÁVEL MOTIVO) ==> Aluno não entregou projeto da referida disciplina.</li>
+            <li>Qualquer dúvida procure o professor da disciplina para maiores esclarecimentos.</li>
+            <strong class="final">Cordialmente, Prof. Alberson Wander Sá dos Santos</li>
         </div>
     </div>
     <div class="logo-container">
