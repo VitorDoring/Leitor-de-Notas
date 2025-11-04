@@ -1,4 +1,5 @@
 import gerarHtml
+import gerarPDF
 import pandas as pd
 from prettytable import PrettyTable
 
@@ -21,3 +22,4 @@ for _, linha in planilha.iterrows():
     print(f"Aluno {values[1].upper()} está na linha {_ + 2}")
     print(f"{table}\n")
     gerarHtml.run(keys,values)
+    gerarPDF.run(keys,values)

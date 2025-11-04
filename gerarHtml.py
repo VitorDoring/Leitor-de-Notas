@@ -1,6 +1,6 @@
-def run (keys,values):
+def run (keys, values):
     
-    def calcularMedia():
+    def formulaCalcularMedia():
     
         calculo = f"((AT {materias[0]}"
         for x in range(1,len(materias)-1):
@@ -232,9 +232,9 @@ def run (keys,values):
     html += f"""                </tr>
             </tbody>
         </table>
-        <button class = btn-pdf>Exportar para PDF</button>
+        <button class = btn-pdf onclick="downloadpdf()">Exportar para PDF</button>
         <div class="caixa-de-atenção">
-            <li>{calcularMedia()}</strong>
+            <li>{formulaCalcularMedia()}</strong>
             <li>ATENÇÃO: NOTA(S) NÃO DIVULGADA(S), (PROVÁVEL MOTIVO) ==> Aluno não entregou projeto da referida disciplina.</li>
             <li>Qualquer dúvida procure o professor da disciplina para maiores esclarecimentos.</li>
             <strong class="final">Cordialmente, Prof. Alberson Wander Sá dos Santos</li>
@@ -243,6 +243,14 @@ def run (keys,values):
     <div class="logo-container">
         <img src="https://www.reforco.net/imgempresas/colegio-univap-villa-branca-ja-491-OJ0a.jpg" alt="Logo da Escola" class="logo-escola">
     </div>
+    <script>
+        function downloadpdf() {{
+            const link = document.createElement('a');
+            link.href = '../arquivos_pdf/{values[0]}.pdf';
+            link.download = 'notas-tecnico.pdf';
+            link.click();
+        }}
+    </script>
 </body>
 </html>
 
