@@ -446,6 +446,15 @@ dados = dict()
 
 planilha = ler_excel()
 
+def ler_excel(caminho,nome_aba):
+    excel = pd.ExcelFile(caminho)
+    planilha = excel.parse(nome_aba)
+    return planilha
+
+planilha = ler_excel('planilhas/planilha.xlsx','Página1')
+
+dados = dict()
+
 for _, linha in planilha.iterrows():
     dados = linha.to_dict()
     keys = list(dados.keys())[:]
@@ -459,3 +468,6 @@ for _, linha in planilha.iterrows():
     #gerarPDF(keys,values)
     if _ == 0:
         break
+    gerarHtml.run(keys,values)
+    gerarPDF.run(keys,values)
+
