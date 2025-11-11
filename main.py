@@ -19,7 +19,7 @@ caminho_notasAT = 'notasAT'
 
 
 #COLOQUE AQUI NOMES DE EVENTOS QUE CONTAM COMO NOTA EXTRA E NÃO NOTA ESSENCIAL
-eventos_notas_extras = ["feira"]
+eventos_notas_extras = ["FEIRA",]
 
 
 
@@ -33,11 +33,38 @@ def ler_excel():
 
 
 #GERAÇÃO DO HTML
-def gerarHtml(keys, values):
+def gerarHtml(keys,values):
     
     materias = [materia for materia in keys[3:]]
     notas = [nota for nota in values[3:]]
-    media = notas.pop(len(notas)-1)
+
+    def gerarTabela(materias,notas):
+        colunas = ""
+        valores = ""
+        for x in range(0,len(materias)):
+            colunas = colunas + f'                    <th>{materias[x]}</th>\n'
+            if materias[x].upper() not in eventos_notas_extras and materias[x] != materias[len(materias)-1]:
+                if notas[x] == "NOTA NÃO INFORMADA":
+                    valores += f'                    <td class="nota-nao-informada">{notas[x]}</td>\n'
+                elif notas[x] < 6:
+                    valores += f'                    <td class="nota-vermelha">{notas[x]:.1f}</td>\n'
+                elif notas[x] >= 6:
+                    valores += f'                    <td class="nota-azul">{notas[x]:.1f}</td>\n'
+            elif materias[x] == materias[len(materias)-1]:
+                if notas[x] < 6:
+                    valores += f'                    <td class="media-vermelha">{notas[x]:.1f}</td>\n'
+                else:
+                    valores += f'                    <td class="media-azul">{notas[x]:.1f}</td>\n'
+            
+            else:
+                try:
+                    valores += f'                    <td class="eventos">{notas[x]:.1f}</td>\n'
+                except:
+                    valores += f'                    <td class="nota-nao-informada">NULO</td>\n'   
+        return colunas, valores
+    
+    colunas, valores = gerarTabela(materias,notas)
+
     html = f"""
 <!DOCTYPE html>
 <html lang="pt-br">
@@ -153,6 +180,12 @@ def gerarHtml(keys, values):
             font-size: 18px;
         }}
 
+        .eventos {{
+            color: #63dc26;
+            font-weight: bold;
+            font-size: 18px;
+        }}
+
         .nota-nao-informada{{
             color: #000000;
             font-weight: 500;
@@ -252,30 +285,13 @@ def gerarHtml(keys, values):
         <table class="tabela-notas">
             <thead>
                 <tr>
-"""
-    for _,materia in enumerate(materias):
-        html += f'                    <th>{materia}</th>\n'
-
-    html += """                </tr>
+{colunas}
+                </tr>
             </thead>
             <tbody>
                 <tr>
-"""
-    for _, nota in enumerate(notas):
-        try:
-            if nota < 6:
-                html += f'                    <td class="nota-vermelha">{nota:.1f}</td>\n'
-            elif nota >= 6:
-                html += f'                    <td class="nota-azul">{nota:.1f}</td>\n'       
-        except:
-            html += f'                    <td class="nota-nao-informada">NÃO INFORMADA</td>\n'
-
-    if media < 6:
-        html += f'                    <td class="media-vermelha">{media:.1f}</td>\n'
-    else:
-        html += f'                    <td class="media-azul">{media:.1f}</td>\n'
-
-    html += f"""                </tr>
+{valores}
+                </tr>
             </tbody>
         </table>
         <button class = btn-pdf download = "{values[0]}.pdf">Exportar para PDF</button>
@@ -441,17 +457,10 @@ def gerarPDF(keys, values):
 
 
 
+
 #GERAÇÃO DOS ARQUIVOS
-dados = dict()
 
 planilha = ler_excel()
-
-def ler_excel(caminho,nome_aba):
-    excel = pd.ExcelFile(caminho)
-    planilha = excel.parse(nome_aba)
-    return planilha
-
-planilha = ler_excel('planilhas/planilha.xlsx','Página1')
 
 dados = dict()
 
@@ -465,9 +474,5 @@ for _, linha in planilha.iterrows():
     print(f"Aluno {values[1].upper()} está na linha {_ + 2}")
     print(f"{table}\n")
     gerarHtml(keys,values)
-    #gerarPDF(keys,values)
-    if _ == 0:
-        break
-    gerarHtml.run(keys,values)
-    gerarPDF.run(keys,values)
+    # gerarPDF(keys,values)
 
