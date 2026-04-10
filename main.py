@@ -2,12 +2,13 @@ import pandas as pd
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib import colors
 from prettytable import PrettyTable
 
-#TRANSFORMAÇÃO DO EXCEL EM DF = LINHA 30
-#GERAÇÃO DO HTML = LINHA 39
-#GERAÇÃO DOS PDFs = LINHA 338
-#GERAÇÃO DOS ARQUIVOS (main) = LINHA 481
+#TRANSFORMAÇÃO DO EXCEL EM DF = LINHA 22
+#GERAÇÃO DO HTML = LINHA 34
+#GERAÇÃO DOS PDFs = LINHA 498
+#GERAÇÃO DOS ARQUIVOS (main) = LINHA 692
 
 #####################################################################################################################
 caminho_planilha = 'planilhas/planilha.xlsx'
@@ -34,27 +35,27 @@ def gerarHtml(keys,values):
     def gerarTabela(materias,notas):
         colunas = ""
         valores = ""
-        for x in range(0,len(materias)):
-            colunas = colunas + f'                    <th>{materias[x]}</th>\n'
-            if materias[x].upper() not in eventos_notas_extras and materias[x] != materias[len(materias)-1]:
-                if notas[x] == "NOTA NÃO INFORMADA":
-                    valores += f'                    <td class="nota-nao-informada">N/A</td>\n'
-                elif notas[x] < 6:
-                    valores += f'                    <td class="nota-vermelha">{notas[x]:.1f}</td>\n'
-                elif notas[x] >= 6:
-                    valores += f'                    <td class="nota-azul">{notas[x]:.1f}</td>\n'
-            elif materias[x] == materias[len(materias)-1]:
-                if notas[x] == "NOTA NÃO INFORMADA":
-                    valores += f'                    <td class="nota-nao-informada">N/A</td>\n'
-                elif notas[x] < 6:
-                    valores += f'                    <td class="media-vermelha">{notas[x]:.1f}</td>\n'
-                else:
-                    valores += f'                    <td class="media-azul">{notas[x]:.1f}</td>\n'
+
+        for i, materia in enumerate(materias):
+            colunas += f'                    <th>{materia}</th>\n'
+
+            nota = notas[i]
+
+            if nota == "NOTA NÃO INFORMADA":
+                valores += '<td class="nota-nao-informada">N/A</td>\n'
+                continue
+
+            if materia in eventos_notas_extras:
+                valores += f'<td class="eventos">{nota:.1f}</td>\n'
+                continue
+
+            if i == len(materias) - 1:  # média
+                classe = "media-azul" if nota >= 6 else "media-vermelha"
             else:
-                try:
-                    valores += f'                    <td class="eventos">{notas[x]:.1f}</td>\n'
-                except:
-                    valores += f'                    <td class="nota-nao-informada">NULO</td>\n'   
+                classe = "nota-azul" if nota >= 6 else "nota-vermelha"
+
+            valores += f'<td class="{classe}">{nota:.1f}</td>\n'
+
         return colunas, valores
     
     colunas, valores = gerarTabela(materias,notas)
@@ -65,7 +66,7 @@ def gerarHtml(keys,values):
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="../logo.png">
+    <link rel="icon" type="image/png" href="../imagens/logo.png">
     <title>NOTAS DE PROJETOS</title>
     <style>
     * {{
@@ -247,6 +248,10 @@ def gerarHtml(keys,values):
         transform: translateY(1px);
     }}
 
+    .nav-tabela {{
+        display: none !important;
+    }}
+
     .caixa-de-atenção {{
         text-align: left;
         padding: 1rem;
@@ -301,12 +306,70 @@ def gerarHtml(keys,values):
     @media (max-width: 768px) {{
     
     .logo-escola {{
-        width: 200px;  /* ou qualquer tamanho que preferir */
+        width: 200px;
     }}
 
     .logo-container {{
-        margin-top: -5%;
+        margin-top: -7%;
         margin-bottom: -4%;
+    }}
+
+    .nav-tabela {{
+        display: flex !important; 
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 28px;
+        gap: 10px;
+    }}
+    
+    .seta-nav {{
+        background: #2e58a5;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }}
+    
+
+    .seta-nav:first-child {{
+        margin-right: auto;
+    }}
+    
+
+    .seta-nav:last-child {{
+        margin-left: auto;
+    }}
+    
+    .seta-nav:active {{
+        transform: scale(0.92);
+        background: #1e3a6b;
+    }}
+    
+    .seta-nav svg {{
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: white;
+        stroke-width: 2.5;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }}
+
+    .tabela-wrapper {{
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }}
+
+    .tabela-wrapper::-webkit-scrollbar {{
+        display: none;
     }}
 
     .tabela-notas {{
@@ -326,6 +389,10 @@ def gerarHtml(keys,values):
         padding: 20px;
         white-space: nowrap;
     }}
+
+    .btn-pdf {{
+        margin-top: -8%;
+    }}
     
     h1 {{
         font-size: 18px !important;
@@ -344,7 +411,7 @@ def gerarHtml(keys,values):
 </head>
 <body>
 <div class="logo-container">
-        <img src="https://www.reforco.net/imgempresas/colegio-univap-villa-branca-ja-491-OJ0a.jpg" alt="Logo da Escola" class="logo-escola">
+        <img src="../imagens/logo_colegios_univap.jpg" alt="Logo da Escola" class="logo-escola">
     </div>
     <div class="container">
         <div class="info-aluno">
@@ -367,10 +434,22 @@ def gerarHtml(keys,values):
                 </tbody>
             </table>
         </div>
+        <div class="nav-tabela">
+            <button class="seta-nav" id="seta-esquerda">
+                <svg viewBox="0 0 24 24">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </button>
+            <button class="seta-nav" id="seta-direita">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 18l6-6-6-6"/>
+                </svg>
+            </button>
+        </div>
         <button class = btn-pdf onclick= "download()">Exportar para PDF</button>
         <div class="caixa-de-atenção">
             <p>• <strong>ATENÇÃO</strong> — Nota(s) não divulgada(s)</p>
-            <p style="margin-left: 1.2rem;">Motivo: Aluno não entregou o projeto da disciplina.</p>
+            <p style="margin-left: 1.2rem;">Provável motivo: Aluno não entregou o projeto da disciplina.</p>
             <p>• Em caso de dúvidas, consulte o professor responsável.</p>
             <div class="final">
                 Cordialmente,<br>
@@ -389,6 +468,22 @@ def gerarHtml(keys,values):
             link.download = 'notas-tecnico.pdf';
             link.click();
         }}
+
+        document.addEventListener('DOMContentLoaded', function() {{
+        const wrapper = document.querySelector('.tabela-wrapper');
+        const setaEsquerda = document.getElementById('seta-esquerda');
+        const setaDireita = document.getElementById('seta-direita');
+        
+        if (!wrapper || !setaEsquerda || !setaDireita) return;
+        
+        document.getElementById('seta-esquerda').onclick = () => {{
+            document.querySelector('.tabela-wrapper').scrollBy({{ left: -300, behavior: 'smooth' }});
+        }};
+
+        document.getElementById('seta-direita').onclick = () => {{
+            document.querySelector('.tabela-wrapper').scrollBy({{left: 300, behavior: 'smooth' }});
+        }};
+    }});
     </script>
 </body>
 </html>
@@ -400,141 +495,194 @@ def gerarHtml(keys,values):
     arquivohtml.write(html)
     arquivohtml.close()
 
-#GERAÇÃO DOS PDFs
-from reportlab.lib.pagesizes import A4
-from reportlab.pdfgen import canvas
-
 def gerarPDF(keys, values):
-    materias = [materia for materia in keys[3:]]
-    notas = [nota for nota in values[3:]]
+    materias = keys[3:]
+    notas = values[3:]
 
-    # Cores
-    cor_titulo = (30/255, 58/255, 138/255)
-    cor_azul = (37/255, 99/255, 235/255)
-    cor_vermelho = (220/255, 38/255, 38/255)
-    cor_verde = (78/255, 165/255, 34/255)
-
-    # Configuração do PDF
     pdf = canvas.Canvas(f"{caminho_notasAT}/{values[0]}.pdf", pagesize=A4)
     width, height = A4
-    margem_esq = 50
-    margem_dir = width - 50
-    y_pos = height - 80
 
-    # Título
-    pdf.setFont("Helvetica-Bold", 16)
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.drawCentredString(width / 2, y_pos, "BOLETIM DE NOTAS DO TÉCNICO")
+    margem = 30
+    y = height - 50
 
-    # Informações do aluno
-    y_pos -= 45
-    pdf.setFont("Helvetica-Bold", 13)
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.drawString(margem_esq, y_pos, "INFORMAÇÕES DO ALUNO")
+    # CORES
+    azul_principal = colors.Color(30/255, 58/255, 138/255)
+    azul_secundario = colors.Color(37/255, 99/255, 235/255)
+    verde = colors.Color(34/255, 197/255, 94/255)
+    vermelho = colors.Color(220/255, 38/255, 38/255)
+    cinza_claro = colors.Color(240/255, 240/255, 240/255)
 
-    y_pos -= 40
-    pdf.setFont("Helvetica-Bold", 12)
+    # =========================
+    # HEADER
+    # =========================
+    pdf.setFillColor(azul_principal)
+    pdf.rect(0, height - 95, width, 95, fill=1, stroke=0)
 
-    # Labels em azul, valores em preto
-    espacamento_vertical = 18
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.drawString(margem_esq, y_pos, "RA:")
-    pdf.setFillColorRGB(0, 0, 0)
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(margem_esq + 35, y_pos, str(values[0]))
-    y_pos -= espacamento_vertical
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 20)  # maior
+    pdf.drawCentredString(width/2, height - 55, "Boletim de Notas do Técnico")
 
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.drawString(margem_esq, y_pos, "ALUNO:")
-    pdf.setFillColorRGB(0, 0, 0)
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(margem_esq + 55, y_pos, values[1])
-    y_pos -= espacamento_vertical
+    # =========================
+    # INFORMAÇÕES
+    # =========================
+    y -= 115
 
-    pdf.setFont("Helvetica-Bold", 12)
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.drawString(margem_esq, y_pos, "TURMA:")
-    pdf.setFillColorRGB(0, 0, 0)
-    pdf.setFont("Helvetica", 11)
-    pdf.drawString(margem_esq + 55, y_pos, values[2])
-    y_pos -= 25
+    pdf.setFillColor(azul_principal)
+    pdf.setFont("Helvetica-Bold", 15)
+    pdf.drawString(margem, y, "INFORMAÇÕES DO ALUNO")
 
-    # Linha azul abaixo das informações
-    pdf.setStrokeColorRGB(*cor_titulo)
-    pdf.line(margem_esq, y_pos, margem_dir, y_pos)
-    y_pos -= 30
+    y -= 32
 
-    # Tabela de notas
-    altura_cab = 25
-    altura_valores = 25
-    largura_coluna = (margem_dir - margem_esq) / len(materias)
+    def linha_info(label, valor):
+        nonlocal y
+        pdf.setFont("Helvetica-Bold", 13)
+        pdf.setFillColor(azul_principal)
+        pdf.drawString(margem, y, label)
+
+        pdf.setFont("Helvetica", 13)
+        pdf.setFillColor(colors.black)
+        pdf.drawString(margem + 80, y, str(valor))
+
+        y -= 24
+
+    linha_info("RA:", values[0])
+    linha_info("ALUNO:", values[1])
+    linha_info("TURMA:", values[2])
+
+    # Linha separadora
+    y -= 10
+    pdf.setStrokeColor(azul_principal)
+    pdf.setLineWidth(1.3)
+    pdf.line(margem, y, width - margem, y)
+
+    # =========================
+    # TABELA
+    # =========================
+    y -= 70
+
+    largura_total = width - 2 * margem
+    largura_col = largura_total / len(materias)
+
+    altura = 40
 
     # Cabeçalho
-    pdf.setFillColorRGB(*cor_titulo)
-    pdf.rect(margem_esq, y_pos - altura_cab, margem_dir - margem_esq, altura_cab, fill=1, stroke=0)
-    pdf.setFont("Helvetica-Bold", 10)
-    pdf.setFillColorRGB(1, 1, 1)
+    pdf.setFillColor(azul_principal)
+    pdf.rect(margem, y, largura_total, altura, fill=1, stroke=0)
+
+    pdf.setFillColor(colors.white)
+    pdf.setFont("Helvetica-Bold", 12)
 
     for i, materia in enumerate(materias):
-        x = margem_esq + i * largura_coluna + 5
-        pdf.drawString(x, y_pos - 17, materia)
+        x_centro = margem + i * largura_col + largura_col / 2
+        pdf.drawCentredString(x_centro, y + 13, materia[:12])
 
-    # Notas
-    y_pos -= altura_cab
-    pdf.setFillColorRGB(0, 0, 0)
-    pdf.rect(margem_esq, y_pos - altura_valores, margem_dir - margem_esq, altura_valores, fill=0, stroke=1)
-    pdf.setFont("Helvetica-Bold", 11)
+    y -= altura
+
+    pdf.setFillColor(cinza_claro)
+    pdf.rect(margem, y, largura_total, altura, fill=1, stroke=0)
+
+    pdf.setFont("Helvetica-Bold", 13)
 
     for i, nota in enumerate(notas):
-        x = margem_esq + i * largura_coluna + 10
+        x_centro = margem + i * largura_col + largura_col / 2
+
         if nota == "NOTA NÃO INFORMADA":
-            pdf.setFillColorRGB(0, 0, 0)
-            pdf.drawString(x, y_pos - 17, "NA")
+            pdf.setFillColor(colors.black)
+            texto = "N/A"
+
         elif materias[i] in eventos_notas_extras:
-            cor = cor_verde
-            pdf.setFillColorRGB(*cor)
-            pdf.drawString(x, y_pos - 17, f"{float(nota):.1f}")
+            pdf.setFillColor(verde)
+            texto = f"{float(nota):.1f}"
+
         else:
-            cor = cor_azul if float(nota) >= 6 else cor_vermelho
-            pdf.setFillColorRGB(*cor)
-            pdf.drawString(x, y_pos - 17, f"{float(nota):.1f}")
+            cor = azul_secundario if float(nota) >= 6 else vermelho
+            pdf.setFillColor(cor)
+            texto = f"{float(nota):.1f}"
 
-    # Moldura preta ao redor da tabela completa (cabeçalho + valores)
-    pdf.setStrokeColorRGB(0, 0, 0)
-    pdf.setLineWidth(1.3)
-    pdf.rect(margem_esq, y_pos - altura_valores, margem_dir - margem_esq, altura_cab + altura_valores, fill=0, stroke=1)
+        pdf.drawCentredString(x_centro, y + 13, texto)
 
-    # Caixa amarela (informações e observações)
-    y_pos -= altura_valores + 50
-    pdf.setStrokeColorRGB(255/255, 223/255, 43/255)
-    pdf.setFillColorRGB(252/255, 238/255, 161/255)
+    # Borda externa
+    pdf.setStrokeColor(colors.black)
+    pdf.setLineWidth(1.5)
+    pdf.rect(margem, y, largura_total, altura * 2, fill=0)
+
+    # Linhas internas
+    pdf.setStrokeColor(colors.Color(0.2, 0.2, 0.2))
+    pdf.setLineWidth(1)
+
+    # Linha horizontal (entre cabeçalho e notas)
+    pdf.line(
+        margem,
+        y + altura,
+        margem + largura_total,
+        y + altura
+    )
+
+    # Linhas verticais (divisões das colunas)
+    for i in range(1, len(materias)):
+        x = margem + i * largura_col
+        pdf.line(x, y, x, y + altura * 2)
+
+    # =========================
+    # AVISO
+    # =========================
+    y -= 70
 
     texto = [
-        "• ATENÇÃO: NOTA(S) NÃO DIVULGADA(S):",
-        "   Provável motivo → Aluno não entregou projeto da referida disciplina.",
+        "ATENÇÃO — Nota(s) não divulgada(s)",
+        "Provável motivo: aluno não entregou o projeto da disciplina.",
         "",
-        "• Qualquer dúvida procure o professor da disciplina para maiores esclarecimentos.",
-        "",
-        "• NA = Nota não informada"
+        "Em caso de dúvidas, consulte o professor responsável.",
+        "N/A = Nota não informada"
     ]
 
-    altura_linha = 15
-    altura_caixa = len(texto) * altura_linha + 20
-    pdf.rect(margem_esq, y_pos - altura_caixa, margem_dir - margem_esq, altura_caixa, fill=1, stroke=1)
+    altura_linha = 17
+    altura_box = len(texto) * altura_linha + 30
 
-    pdf.setFont("Helvetica", 10)
-    pdf.setFillColorRGB(0, 0, 0)
-    y_texto = y_pos - 15
-    for linha in texto:
-        pdf.drawString(margem_esq + 10, y_texto, linha)
+    pdf.setFillColor(colors.Color(0.94, 0.96, 0.98))
+    pdf.rect(margem, y - altura_box, largura_total, altura_box, fill=1, stroke=0)
+
+    # barra lateral
+    pdf.setFillColor(azul_principal)
+    pdf.rect(margem, y - altura_box, 7, altura_box, fill=1, stroke=0)
+
+    # texto
+    y_texto = y - 22
+    for i, linha in enumerate(texto):
+        if i == 0:
+            pdf.setFont("Helvetica-Bold", 12)
+        else:
+            pdf.setFont("Helvetica", 12)
+
+        pdf.setFillColor(colors.black)
+        pdf.drawString(margem + 14, y_texto, linha)
         y_texto -= altura_linha
 
-    # Assinatura
-    y_pos -= altura_caixa + 40
-    pdf.setFont("Helvetica-Bold", 11)
-    pdf.setFillColorRGB(0, 0, 0)
-    pdf.drawString(margem_esq, y_pos, "Cordialmente, Prof. Alberson Wander Sá dos Santos")
+    # =========================
+    # ASSINATURA
+    # =========================
+    y -= altura_box + 55
+
+    pdf.setFont("Helvetica-Bold", 13)
+    pdf.drawString(margem, y, "Cordialmente,")
+    pdf.drawString(margem, y - 20, "Prof. Alberson Wander Sá dos Santos")
+
+    logo_path = "imagens/logo_colegios_univap.jpg"
+
+    largura_logo = 350
+    altura_logo = 175
+
+    y_logo = y - 220
+
+    pdf.drawImage(
+        logo_path,
+        margem + 270,
+        y_logo,
+        width=largura_logo,
+        height=altura_logo,
+        preserveAspectRatio=True,
+        mask='auto'
+    )
 
     pdf.save()
 
