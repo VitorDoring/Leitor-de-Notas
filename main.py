@@ -7,6 +7,7 @@ from reportlab.lib.utils import ImageReader
 from prettytable import PrettyTable
 import tkinter as tk
 from tkinter import filedialog
+from tkinter import ttk
 import base64
 from io import BytesIO
 
@@ -77,6 +78,42 @@ favicon_base64 = "iVBORw0KGgoAAAANSUhEUgAAASwAAAEsCAYAAAB5fY51AAAACXBIWXMAAC4jAA
 #TRANSFORMAÇÃO DAS BASE64 PARA IMAGENS PARA USO NO PDF
 def base64_para_imagem(b64):
     return ImageReader(BytesIO(base64.b64decode(b64)))
+#####################################################################################################################
+
+
+
+
+#CRIAÇÃO DO POP UP DE LOADING
+#####################################################################################################################
+def criar_loading():
+    janela = tk.Toplevel()
+    janela.title("Processando")
+    janela.geometry("300x120")
+    janela.resizable(False, False)
+
+    janela.update_idletasks()
+    largura = janela.winfo_width()
+    altura = janela.winfo_height()
+    x = (janela.winfo_screenwidth() // 2) - (largura // 2)
+    y = (janela.winfo_screenheight() // 2) - (altura // 2)
+    janela.geometry(f"{largura}x{altura}+{x}+{y}")
+
+
+    label = tk.Label(janela, text="Gerando arquivos...", font=("Arial", 12))
+    label.pack(pady=15)
+
+    barra = ttk.Progressbar(janela, mode='indeterminate', length=250)
+    barra.pack(pady=10)
+
+    barra.start(10)  # velocidade da animação
+
+    janela.deiconify()        # garante que não está minimizada
+    janela.lift()             # traz pra frente
+    janela.attributes('-topmost', True)  # fica acima de tudo
+    janela.after(100, lambda: janela.attributes('-topmost', False))  # volta ao normal
+    janela.focus_force()   
+
+    return janela, barra
 #####################################################################################################################
 
 
@@ -765,8 +802,15 @@ if not caminho_notasAT:
     print("Nenhuma pasta selecionada.")
     exit()
 
+root = tk.Tk()
+root.withdraw()
+
+janela_loading, barra_loading = criar_loading()
+
+
 #Transformação da logo em imagem para uso no PDF
 logo = base64_para_imagem(logo_base64)
+
 
 #Leitura das planilhas
 for caminho in caminhos_planilhas:
@@ -776,6 +820,8 @@ for caminho in caminhos_planilhas:
     for planilha in todas_abas:
         #Leitura de linha por linha da planilha
         for i, dados in enumerate(planilha.to_dict(orient="records")):
+
+            janela_loading.update()
 
             keys = list(dados.keys())
 
@@ -788,6 +834,7 @@ for caminho in caminhos_planilhas:
                     values.append("NOTA NÃO INFORMADA")
                 else:
                     values.append(valor)
+            
 
             #Se matrícula for nula, pula para próxima linha
             if not values[0] or values[0] == "NOTA NÃO INFORMADA":
@@ -808,4 +855,7 @@ for caminho in caminhos_planilhas:
             #Geração dos arquivos
             gerarHtml(keys, values, logo_base64, favicon_base64)
             gerarPDF(keys, values)
+
+janela_loading.destroy()
+root.destroy()
 #####################################################################################################################
