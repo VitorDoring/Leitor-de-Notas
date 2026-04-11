@@ -1,0 +1,9 @@
+1 - EXECUTE O "Gerador de Notas".exe ou rode a "main.py"
+
+2 - Selecione as planilhas que deseja que sejam feitas as leituras (Qualquer caminho ou lugar)
+
+3 - Selecione a pasta onde deseja que sejam gerados os arquivos (Qualquer caminho ou lugar)
+
+4 - Espere o programa gerar todos os arquivos e o pop-up de loading sumir
+
+5 - FIM
